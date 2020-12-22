@@ -10,7 +10,7 @@ from scipy import spatial
 #########one of several .loc files
 #########Loc file name is generated on lines 127-133 - seems like less hassle than two sysargs
 
-#########This directory needs to be changed
+#########This directory needs to be changed to where you keep you sysargs
 sim_dir = "/home/lpe/Desktop/Empty Bg SNR Range Sigxy 2 SigZ 2/"
 
 detection_name = sys.argv[1]

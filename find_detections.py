@@ -3,6 +3,7 @@ import numpy as np
 import csv
 import copy
 from scipy import spatial
+import matplotlib.pyplot as plt
 
 #####Example of use: python ./find_detections.py example_detections/RadialSymmetry_results_Poiss_30spots_bg_200_1_I_300_0_img0.tif_aniso1sig2thr0.007594suppReg3inRat0.3maxErr0.25.txt
 
@@ -19,8 +20,8 @@ detection_name = sys.argv[1]
 #################################################
 #################################################
 ######Adds no_of_augs true points /increases accuracy
-def augment_add_detections(no_of_augs, file_used):
-    deviation = 0.01
+def augment_add_detections(no_of_augs, dev, file_used):
+    deviation = 0.01 + (.05 * dev)
     mean = 0.02
     #Mean and deviation are very small,they are used to to avoid duplicates
     #no_of_augs = how many true points would you like to add
@@ -28,18 +29,41 @@ def augment_add_detections(no_of_augs, file_used):
     more_than = np.zeros((no_of_augs,3))
     
     
-    perturbation = (np.random.normal(mean,deviation,size = (1,3)))
-
     
     rand_generator = np.random.default_rng()
-    random_numbers = rand_generator.choice(gt.shape[0],no_of_augs, replace = False)
+    #######Replace is a parameter that can be changed
+    random_numbers = rand_generator.choice(gt.shape[0],no_of_augs, replace = True)
+    #print(random_numbers)
     counter = 0
     for ind in random_numbers:
+        perturbation = (np.random.normal(mean,deviation,size = (1,3)))
+
         perturbed = file_used[ind] + perturbation[0]
         more_than[counter,:] = perturbed
         counter = counter + 1 
     return(more_than)
+##################Example of script one might use to generate the included plots using the above function
+# number_of_points = []
+# missed_detections = []
+# false_detections = []
 
+# for i in range(30,60):
+#     detections = read_in_detections(detection_name)
+#     gt = read_in_gt(gt_file)
+#     augmented_file = augment_add_detections_replace_true(i,0, gt)
+#     new_detections = profile_detections(gt,augmented_file)
+#     #print("Number of chosen detections is:",i - 30,",Number of missed detections:",new_detections[0],"Number of false detections:",new_detections[1])
+#     number_of_points.append(i)
+#     missed_detections.append(new_detections[0])
+#     false_detections.append(new_detections[1])
+# plt.figure(figsize=(10,10))
+# missed = plt.scatter(number_of_points, missed_detections)
+# false = plt.scatter(number_of_points, false_detections)
+# plt.title("# of points differs,std dev constant, point replacement")
+# plt.xlabel("approximate # of duplicate points")
+# plt.ylabel("# points per error type")
+# plt.legend((missed,false),("Missed detections", "False detections"))
+#################
 
 def profile_detections(unmod,more_than):
 
